@@ -15,6 +15,8 @@ class PremisesController < ApplicationController
   # GET /premises/new
   def new
     @premise = Premise.new
+    @sources = Source.all
+    @arguments = Argument.all
   end
 
   # GET /premises/1/edit
