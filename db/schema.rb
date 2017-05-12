@@ -28,17 +28,17 @@ ActiveRecord::Schema.define(version: 20170512005551) do
   end
 
   create_table "premises_arguments", id: false, force: :cascade do |t|
-    t.integer "premises_id"
-    t.integer "arguments_id"
-    t.index ["arguments_id"], name: "index_premises_arguments_on_arguments_id", using: :btree
-    t.index ["premises_id"], name: "index_premises_arguments_on_premises_id", using: :btree
+    t.integer "premise_id"
+    t.integer "argument_id"
+    t.index ["argument_id"], name: "index_premises_arguments_on_argument_id", using: :btree
+    t.index ["premise_id"], name: "index_premises_arguments_on_premise_id", using: :btree
   end
 
   create_table "premises_sources", id: false, force: :cascade do |t|
-    t.integer "premises_id"
-    t.integer "sources_id"
-    t.index ["premises_id"], name: "index_premises_sources_on_premises_id", using: :btree
-    t.index ["sources_id"], name: "index_premises_sources_on_sources_id", using: :btree
+    t.integer "premise_id"
+    t.integer "source_id"
+    t.index ["premise_id"], name: "index_premises_sources_on_premise_id", using: :btree
+    t.index ["source_id"], name: "index_premises_sources_on_source_id", using: :btree
   end
 
   create_table "sources", force: :cascade do |t|
