@@ -1,0 +1,2 @@
+class Premise < ApplicationRecord
+end
