@@ -71,6 +71,6 @@ class PremisesController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def premise_params
-      params.require(:premise).permit(:name)
+      params.require(:premise).permit(:name, {source_ids: []})
     end
 end

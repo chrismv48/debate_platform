@@ -15,6 +15,7 @@ class SourcesController < ApplicationController
   # GET /sources/new
   def new
     @source = Source.new
+    @premises = Premise.all
   end
 
   # GET /sources/1/edit

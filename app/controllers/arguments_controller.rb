@@ -15,6 +15,7 @@ class ArgumentsController < ApplicationController
   # GET /arguments/new
   def new
     @argument = Argument.new
+    @premises = Premise.all
   end
 
   # GET /arguments/1/edit

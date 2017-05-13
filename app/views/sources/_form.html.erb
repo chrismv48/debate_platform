@@ -11,12 +11,20 @@
     </div>
   <% end %>
 
-  <div class="field">
+  <div class="form-group">
     <%= f.label :name %>
-    <%= f.text_field :name %>
+    <%= f.text_field :name, class: "form-control" %>
+    <h5>Premises</h5>
+    <%= f.collection_check_boxes(:premise_ids, @premises, :id, :name) do |cb| %>
+      <div class="checkbox">
+        <%= cb.label do %>
+          <%= cb.check_box + cb.text %>
+          </div>
+        <% end %>
+    <% end %>
   </div>
 
   <div class="actions">
-    <%= f.submit %>
+    <%= f.submit class: "btn btn-primary" %>
   </div>
 <% end %>

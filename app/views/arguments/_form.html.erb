@@ -4,19 +4,27 @@
       <h2><%= pluralize(argument.errors.count, "error") %> prohibited this argument from being saved:</h2>
 
       <ul>
-      <% argument.errors.full_messages.each do |message| %>
-        <li><%= message %></li>
-      <% end %>
+        <% argument.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
       </ul>
     </div>
   <% end %>
 
-  <div class="field">
+  <div class="form-group">
     <%= f.label :name %>
-    <%= f.text_field :name %>
+    <%= f.text_field :name, class: "form-control" %>
+    <h5>Premises</h5>
+    <%= f.collection_check_boxes(:premise_ids, @premises, :id, :name) do |cb| %>
+      <div class="checkbox">
+        <%= cb.label do %>
+          <%= cb.check_box + cb.text %>
+          </div>
+        <% end %>
+    <% end %>
   </div>
 
   <div class="actions">
-    <%= f.submit %>
+    <%= f.submit class: "btn btn-primary" %>
   </div>
 <% end %>

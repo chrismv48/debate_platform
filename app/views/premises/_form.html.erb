@@ -4,9 +4,9 @@
       <h2><%= pluralize(premise.errors.count, "error") %> prohibited this premise from being saved:</h2>
 
       <ul>
-      <% premise.errors.full_messages.each do |message| %>
-        <li><%= message %></li>
-      <% end %>
+        <% premise.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
       </ul>
     </div>
   <% end %>
@@ -14,7 +14,22 @@
   <div class="form-group">
     <%= f.label :name %>
     <%= f.text_field :name, class: "form-control" %>
-    <%= f.select :source_ids, @sources.collect {|x| [x.name, x.id]}, {}, :multiple => true %>
+    <h5>Sources</h5>
+    <%= f.collection_check_boxes(:source_ids, @sources, :id, :name) do |cb| %>
+      <div class="checkbox">
+        <%= cb.label do %>
+          <%= cb.check_box + cb.text %>
+          </div>
+        <% end %>
+    <% end %>
+    <h5>Arguments</h5>
+    <%= f.collection_check_boxes(:argument_ids, @arguments, :id, :name) do |cb| %>
+      <div class="checkbox">
+        <%= cb.label do %>
+          <%= cb.check_box + cb.text %>
+          </div>
+        <% end %>
+    <% end %>
   </div>
 
   <div class="actions">
