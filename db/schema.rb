@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170512005551) do
+ActiveRecord::Schema.define(version: 20170513233855) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -21,24 +21,21 @@ ActiveRecord::Schema.define(version: 20170512005551) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "premises", force: :cascade do |t|
-    t.string   "name"
+  create_table "premise_sources", force: :cascade do |t|
+    t.integer  "premise_id"
+    t.integer  "source_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["premise_id"], name: "index_premise_sources_on_premise_id", using: :btree
+    t.index ["source_id"], name: "index_premise_sources_on_source_id", using: :btree
   end
 
-  create_table "premises_arguments", id: false, force: :cascade do |t|
-    t.integer "premise_id"
-    t.integer "argument_id"
-    t.index ["argument_id"], name: "index_premises_arguments_on_argument_id", using: :btree
-    t.index ["premise_id"], name: "index_premises_arguments_on_premise_id", using: :btree
-  end
-
-  create_table "premises_sources", id: false, force: :cascade do |t|
-    t.integer "premise_id"
-    t.integer "source_id"
-    t.index ["premise_id"], name: "index_premises_sources_on_premise_id", using: :btree
-    t.index ["source_id"], name: "index_premises_sources_on_source_id", using: :btree
+  create_table "premises", force: :cascade do |t|
+    t.integer  "argument_id"
+    t.string   "name"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+    t.index ["argument_id"], name: "index_premises_on_argument_id", using: :btree
   end
 
   create_table "sources", force: :cascade do |t|
@@ -47,4 +44,18 @@ ActiveRecord::Schema.define(version: 20170512005551) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "supporting_premises", force: :cascade do |t|
+    t.integer  "parent_premise_id"
+    t.integer  "premise_id"
+    t.datetime "created_at",        null: false
+    t.datetime "updated_at",        null: false
+    t.index ["parent_premise_id"], name: "index_supporting_premises_on_parent_premise_id", using: :btree
+    t.index ["premise_id"], name: "index_supporting_premises_on_premise_id", using: :btree
+  end
+
+  add_foreign_key "premise_sources", "premises"
+  add_foreign_key "premise_sources", "sources"
+  add_foreign_key "premises", "arguments"
+  add_foreign_key "supporting_premises", "premises"
+  add_foreign_key "supporting_premises", "premises", column: "parent_premise_id"
 end
