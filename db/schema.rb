@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170513233855) do
+ActiveRecord::Schema.define(version: 20170514001634) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -53,9 +53,9 @@ ActiveRecord::Schema.define(version: 20170513233855) do
     t.index ["premise_id"], name: "index_supporting_premises_on_premise_id", using: :btree
   end
 
-  add_foreign_key "premise_sources", "premises"
-  add_foreign_key "premise_sources", "sources"
+  add_foreign_key "premise_sources", "premises", on_delete: :cascade
+  add_foreign_key "premise_sources", "sources", on_delete: :cascade
   add_foreign_key "premises", "arguments"
-  add_foreign_key "supporting_premises", "premises"
-  add_foreign_key "supporting_premises", "premises", column: "parent_premise_id"
+  add_foreign_key "supporting_premises", "premises", column: "parent_premise_id", on_delete: :cascade
+  add_foreign_key "supporting_premises", "premises", on_delete: :cascade
 end
