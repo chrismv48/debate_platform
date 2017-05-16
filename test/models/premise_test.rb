@@ -16,7 +16,9 @@
 require 'test_helper'
 
 class PremiseTest < ActiveSupport::TestCase
-  # test "the truth" do
-  #   assert true
-  # end
+  test "a premise can only have a single argument" do
+    premises(:one).argument = arguments(:one)
+    premises(:one).save
+    assert_equal(Premise.where(argument_id: arguments(:one).id).count, 1)
+  end
 end

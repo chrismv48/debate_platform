@@ -17,7 +17,18 @@
 require 'test_helper'
 
 class PremiseSourceTest < ActiveSupport::TestCase
-  # test "the truth" do
-  #   assert true
-  # end
+
+  test "a premise has many sources" do
+    premises(:one).sources = [sources(:one), sources(:two)]
+    premises(:one).save
+    assert_equal(Premise.find(premises(:one).id).sources.length, 2)
+    assert_equal(PremiseSource.where(premise_id: premises(:one).id).count, 2)
+  end
+  test "a source has many premises" do
+    sources(:two).premises = [premises(:one), premises(:two)]
+    sources(:two).save
+    assert_equal(Source.find(sources(:two).id).premises.length, 2)
+    assert_equal(PremiseSource.where(source_id: sources(:two).id).count, 2)
+  end
+
 end
