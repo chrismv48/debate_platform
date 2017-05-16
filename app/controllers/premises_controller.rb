@@ -21,6 +21,8 @@ class PremisesController < ApplicationController
 
   # GET /premises/1/edit
   def edit
+    @sources = Source.all
+    @arguments = Argument.all
   end
 
   # POST /premises

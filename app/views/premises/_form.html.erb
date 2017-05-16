@@ -22,14 +22,6 @@
           </div>
         <% end %>
     <% end %>
-    <h5>Arguments</h5>
-    <%= f.collection_check_boxes(:argument_ids, @arguments, :id, :name) do |cb| %>
-      <div class="checkbox">
-        <%= cb.label do %>
-          <%= cb.check_box + cb.text %>
-          </div>
-        <% end %>
-    <% end %>
   </div>
 
   <div class="actions">

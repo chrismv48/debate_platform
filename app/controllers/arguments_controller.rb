@@ -20,6 +20,7 @@ class ArgumentsController < ApplicationController
 
   # GET /arguments/1/edit
   def edit
+    @premises = Premise.all
   end
 
   # POST /arguments

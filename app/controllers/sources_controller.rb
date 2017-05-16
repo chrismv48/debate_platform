@@ -20,6 +20,7 @@ class SourcesController < ApplicationController
 
   # GET /sources/1/edit
   def edit
+    @premises = Premise.all
   end
 
   # POST /sources
