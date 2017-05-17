@@ -8,7 +8,7 @@ end
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'bootstrap-sass'
-gem 'rails', '~> 5.0.2'
+gem 'rails'
 gem 'jquery-rails'
 # Use postgresql as the database for Active Record
 gem 'pg', '~> 0.18'
@@ -23,8 +23,8 @@ gem 'coffee-rails', '~> 4.2'
 # See https://github.com/rails/execjs#readme for more supported runtimes
 # gem 'therubyracer', platforms: :ruby
 
-# Use react as the JavaScript library
-gem 'react-rails'
+gem 'webpacker', github: 'rails/webpacker'
+
 # Turbolinks makes navigating your web application faster. Read more: https://github.com/turbolinks/turbolinks
 gem 'turbolinks', '~> 5'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
@@ -41,14 +41,6 @@ gem 'jbuilder', '~> 2.5'
 gem 'annotate'
 
 gem 'wdm', '>= 0.1.0' if Gem.win_platform?
-
-# Extends ActiveRecord to provide adjacency list functionality
-gem 'acts_as_tree'
-
-group :development, :test do
-  # Call 'byebug' anywhere in the code to stop execution and get a debugger console
-  gem 'byebug', platform: :mri
-end
 
 group :development do
   # Access an IRB console on exception pages or by using <%= console %> anywhere in the code.
