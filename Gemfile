@@ -23,8 +23,6 @@ gem 'coffee-rails', '~> 4.2'
 # See https://github.com/rails/execjs#readme for more supported runtimes
 # gem 'therubyracer', platforms: :ruby
 
-gem 'webpacker', github: 'rails/webpacker'
-
 # Turbolinks makes navigating your web application faster. Read more: https://github.com/turbolinks/turbolinks
 gem 'turbolinks', '~> 5'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
@@ -43,7 +41,7 @@ gem 'annotate'
 gem 'wdm', '>= 0.1.0' if Gem.win_platform?
 
 gem 'webpacker', github: 'rails/webpacker'
-gem 'react-rails'
+gem 'react-rails', github: 'reactjs/react-rails'
 
 group :development do
   # Access an IRB console on exception pages or by using <%= console %> anywhere in the code.

@@ -17,5 +17,5 @@
 .byebug_history
 
 # Ignore IDE project files
-.idea//public/packs
+.idea/
 /node_modules
