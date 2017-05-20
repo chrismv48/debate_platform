@@ -42,6 +42,9 @@ gem 'annotate'
 
 gem 'wdm', '>= 0.1.0' if Gem.win_platform?
 
+gem 'webpacker', github: 'rails/webpacker'
+gem 'react-rails'
+
 group :development do
   # Access an IRB console on exception pages or by using <%= console %> anywhere in the code.
   gem 'web-console', '>= 3.3.0'
