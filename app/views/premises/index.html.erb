@@ -2,23 +2,38 @@
 
 <h1>Premises</h1>
 
-<table>
+<table class="table table-hover table-condensed">
   <thead>
-    <tr>
-      <th>Name</th>
-      <th colspan="3"></th>
-    </tr>
+  <tr>
+    <th>Name</th>
+    <th>Argument</th>
+    <th>Sources</th>
+    <th></th>
+  </tr>
   </thead>
 
   <tbody>
-    <% @premises.each do |premise| %>
-      <tr>
-        <td><%= premise.name %></td>
-        <td><%= link_to 'Show', premise %></td>
-        <td><%= link_to 'Edit', edit_premise_path(premise) %></td>
-        <td><%= link_to 'Destroy', premise, method: 'delete', data: { confirm: 'Are you sure?' } %></td>
-      </tr>
-    <% end %>
+  <% @premises.each do |premise| %>
+    <tr>
+      <td><%= link_to "(#{premise.id}) #{premise.name}", premise_path(premise) %></td>
+      <td>
+        <% if premise.argument %>
+          <%= link_to "(#{premise.argument.id}) #{premise.argument.name}", argument_path(premise.argument) %>
+        <% end %>
+      </td>
+      <td>
+        <ul class="list-unstyled">
+          <% premise.sources.each do |source| %>
+            <li><%= link_to "(#{source.id}) #{source.name}", source_path(source) %></li>
+          <% end %>
+        </ul>
+      </td>
+      <td>
+        <%= link_to 'Edit', edit_premise_path(premise) %> |
+        <%= link_to 'Destroy', premise, method: :delete, data: {confirm: 'Are you sure?'} %>
+      </td>
+    </tr>
+  <% end %>
   </tbody>
 </table>
 

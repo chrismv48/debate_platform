@@ -14,7 +14,7 @@
 #
 
 class Premise < ApplicationRecord
-  belongs_to :argument
+  belongs_to :argument, optional: true
 
   has_many :premise_sources, dependent: :delete_all
   has_many :sources, through: :premise_sources

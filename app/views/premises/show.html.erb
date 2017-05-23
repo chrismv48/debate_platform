@@ -1,9 +1,18 @@
 <p id="notice"><%= notice %></p>
 
-<p>
-  <strong>Name:</strong>
-  <%= @premise.name %>
-</p>
+<h1><%= @premise.name %></h1>
+
+<% if @premise.argument %>
+  <h4>Argument</h4>
+  <h5><%= link_to "(#{@premise.argument.id}) #{@premise.argument.name}", argument_path(@premise.argument) %></h5>
+<% end %>
+
+<% if @premise.sources.any? %>
+  <h4>Sources</h4>
+  <% @premise.sources.each do |source| %>
+    <h5><%= link_to "(#{source.id}) #{source.name}", source_path(source) %></h5>
+  <% end %>
+<% end %>
 
 <%= link_to 'Edit', edit_premise_path(@premise) %> |
 <%= link_to 'Back', premises_path %>

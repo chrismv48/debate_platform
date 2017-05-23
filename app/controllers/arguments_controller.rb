@@ -15,12 +15,12 @@ class ArgumentsController < ApplicationController
   # GET /arguments/new
   def new
     @argument = Argument.new
-    @premises = Premise.all
+    @premises = Premise.where({argument_id: nil}).all
   end
 
   # GET /arguments/1/edit
   def edit
-    @premises = Premise.all
+    @premises = Premise.where({argument_id: nil}).all
   end
 
   # POST /arguments
@@ -29,12 +29,16 @@ class ArgumentsController < ApplicationController
     @argument = Argument.new(argument_params)
 
     respond_to do |format|
-      if @argument.save
-        format.html { redirect_to @argument, notice: 'Argument was successfully created.' }
-        format.json { render :show, status: :created, location: @argument }
-      else
-        format.html { render :new }
-        format.json { render json: @argument.errors, status: :unprocessable_entity }
+      begin
+        ActiveRecord::Base.transaction do
+          @argument.save!
+          @argument.premise_ids = premise_ids[:premise_ids]
+          format.html {redirect_to @argument, notice: 'Argument was successfully created.'}
+          format.json {render :show, status: :created, location: @argument}
+        end
+      rescue ActiveRecord::RecordInvalid => exception
+        format.html {render :new}
+        format.json {render json: @argument.errors, status: :unprocessable_entity}
       end
     end
   end
@@ -43,12 +47,16 @@ class ArgumentsController < ApplicationController
   # PATCH/PUT /arguments/1.json
   def update
     respond_to do |format|
-      if @argument.update(argument_params)
-        format.html { redirect_to @argument, notice: 'Argument was successfully updated.' }
-        format.json { render :show, status: :ok, location: @argument }
-      else
-        format.html { render :edit }
-        format.json { render json: @argument.errors, status: :unprocessable_entity }
+      begin
+        ActiveRecord::Base.transaction do
+          @argument.update(argument_params)
+          @argument.premise_ids = premise_ids[:premise_ids]
+          format.html {redirect_to @argument, notice: 'Argument was successfully updated.'}
+          format.json {render :show, status: :ok, location: @argument}
+        end
+      rescue ActiveRecord::RecordInvalid
+        format.html {render :edit}
+        format.json {render json: @argument.errors, status: :unprocessable_entity}
       end
     end
   end
@@ -58,19 +66,23 @@ class ArgumentsController < ApplicationController
   def destroy
     @argument.destroy
     respond_to do |format|
-      format.html { redirect_to arguments_url, notice: 'Argument was successfully destroyed.' }
-      format.json { head :no_content }
+      format.html {redirect_to arguments_url, notice: 'Argument was successfully destroyed.'}
+      format.json {head :no_content}
     end
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_argument
-      @argument = Argument.find(params[:id])
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_argument
+    @argument = Argument.find(params[:id])
+  end
 
-    # Never trust parameters from the scary internet, only allow the white list through.
-    def argument_params
-      params.require(:argument).permit(:name)
-    end
+  # Never trust parameters from the scary internet, only allow the white list through.
+  def argument_params
+    params.require(:argument).permit(:name)
+  end
+
+  def premise_ids
+    params.permit(premise_ids: [])
+  end
 end

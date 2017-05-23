@@ -4,7 +4,7 @@ class SourcesController < ApplicationController
   # GET /sources
   # GET /sources.json
   def index
-    @sources = Source.all
+    @sources = Source.includes(:premises).all
   end
 
   # GET /sources/1
@@ -15,26 +15,28 @@ class SourcesController < ApplicationController
   # GET /sources/new
   def new
     @source = Source.new
-    @premises = Premise.all
   end
 
   # GET /sources/1/edit
   def edit
-    @premises = Premise.all
   end
 
   # POST /sources
   # POST /sources.json
   def create
-    @source = Source.new(source_params)
 
     respond_to do |format|
-      if @source.save
-        format.html { redirect_to @source, notice: 'Source was successfully created.' }
-        format.json { render :show, status: :created, location: @source }
-      else
-        format.html { render :new }
-        format.json { render json: @source.errors, status: :unprocessable_entity }
+      begin
+        ActiveRecord::Base.transaction do
+          @source = Source.new(source_params)
+          @source.save!
+          @source.premise_ids = premise_ids[:premise_ids]
+          format.html {redirect_to @source, notice: 'Source was successfully created.'}
+          format.json {render :show, status: :created, location: @source}
+        end
+      rescue ActiveRecord::RecordInvalid
+        format.html {render :new}
+        format.json {render json: @source.errors, status: :unprocessable_entity}
       end
     end
   end
@@ -43,12 +45,16 @@ class SourcesController < ApplicationController
   # PATCH/PUT /sources/1.json
   def update
     respond_to do |format|
-      if @source.update(source_params)
-        format.html { redirect_to @source, notice: 'Source was successfully updated.' }
-        format.json { render :show, status: :ok, location: @source }
-      else
-        format.html { render :edit }
-        format.json { render json: @source.errors, status: :unprocessable_entity }
+      begin
+        ActiveRecord::Base.transaction do
+          @source.update(source_params)
+          @source.premise_ids = premise_ids[:premise_ids]
+          format.html {redirect_to @source, notice: 'Source was successfully updated.'}
+          format.json {render :show, status: :ok, location: @source}
+        end
+      rescue ActiveRecord::RecordInvalid
+        format.html {render :edit}
+        format.json {render json: @source.errors, status: :unprocessable_entity}
       end
     end
   end
@@ -58,19 +64,24 @@ class SourcesController < ApplicationController
   def destroy
     @source.destroy
     respond_to do |format|
-      format.html { redirect_to sources_url, notice: 'Source was successfully destroyed.' }
-      format.json { head :no_content }
+      format.html {redirect_to sources_url, notice: 'Source was successfully destroyed.'}
+      format.json {head :no_content}
     end
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_source
-      @source = Source.find(params[:id])
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_source
+    @source = Source.find(params[:id])
+  end
 
-    # Never trust parameters from the scary internet, only allow the white list through.
-    def source_params
-      params.require(:source).permit(:name)
-    end
+  # Never trust parameters from the scary internet, only allow the white list through.
+  def source_params
+    params.require(:source).permit(:name)
+  end
+
+  def premise_ids
+    params.permit(:premise_ids => [])
+  end
+
 end

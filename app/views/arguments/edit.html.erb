@@ -1,6 +1,8 @@
 <h1>Editing Argument</h1>
 
-<%= render 'form', argument: @argument %>
+<%= render 'edit_new', argument: @argument, premises: @premises %>
 
+<div>
 <%= link_to 'Show', @argument %> |
 <%= link_to 'Back', arguments_path %>
+</div>
