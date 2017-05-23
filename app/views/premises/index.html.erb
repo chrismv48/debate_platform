@@ -7,6 +7,7 @@
   <tr>
     <th>Name</th>
     <th>Argument</th>
+    <th>Supporting Premises</th>
     <th>Sources</th>
     <th></th>
   </tr>
@@ -21,6 +22,14 @@
           <%= link_to "(#{premise.argument.id}) #{premise.argument.name}", argument_path(premise.argument) %>
         <% end %>
       </td>
+      <td>
+        <ul class="list-unstyled">
+          <% premise.supporting_premises.each do |supporting_premise| %>
+            <li><%= link_to "(#{supporting_premise.id}) #{supporting_premise.name}", source_path(supporting_premise) %></li>
+          <% end %>
+        </ul>
+      </td>
+      <td>
       <td>
         <ul class="list-unstyled">
           <% premise.sources.each do |source| %>

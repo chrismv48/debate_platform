@@ -10,22 +10,18 @@ export default class EditNewPremise extends Component {
     super(props);
     this.state = {
       loading: false,
-      // premise: this.props.premise,
-      // argument: this.props.argument,
-      // associatedArguments: this.props.associatedArguments,
-      // sources: this.props.sources,
-      // associatedSources: this.props.associatedSources
       ...this.props
     };
   }
 
   onSubmitForm(event) {
     event.preventDefault()
-    const {premise, associatedSources, associatedArgument} = this.state
-    premise.argument_id = associatedArgument['id']
+    const {premise, associatedSources, associatedArgument, supportingPremises} = this.state
+    premise.argument_id = associatedArgument ? associatedArgument['id']: null
     let data = {
       premise: premise,
       source_ids: associatedSources.map((source) => source.id),
+      supporting_premise_ids: supportingPremises.map((sp) => sp.id),
       authenticity_token: this.props.authenticity_token
     }
     let method = null
@@ -60,7 +56,7 @@ export default class EditNewPremise extends Component {
 
   render() {
     console.log(this.state)
-    const {premise, sources, associatedSources, arguments_, associatedArgument} = this.state
+    const {premise, sources, associatedSources, arguments_, associatedArgument, premises, supportingPremises} = this.state
     return (
       <div>
         <form>
@@ -75,7 +71,7 @@ export default class EditNewPremise extends Component {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="argument">Associate Argument</label>
+            <label htmlFor="argument">Associated Argument</label>
             <Select
               name="form-field-name"
               options={arguments_}
@@ -88,7 +84,21 @@ export default class EditNewPremise extends Component {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="premiseSources">Associate Source(s)</label>
+            <label htmlFor="supportingPremises">Supporting Premise(s)</label>
+            <Select
+              name="form-field-name"
+              options={premises}
+              onChange={(value) => this.setState({supportingPremises: value})}
+              multi={true}
+              value={supportingPremises}
+              autosize={true}
+              labelKey="name"
+              valueKey="id"
+              searchable={true}
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="premiseSources">Associated Source(s)</label>
             <Select
               name="form-field-name"
               options={sources}
@@ -119,12 +129,14 @@ EditNewPremise.propTypes = {
   sources: PropTypes.array,
   associatedSources: PropTypes.array,
   arguments_: PropTypes.array,
-  associatedArgument: PropTypes.object
+  associatedArgument: PropTypes.object,
+  supportingPremises: PropTypes.array
 }
 
 EditNewPremise.defaultProps = {
   sources: [],
   associatedSources: [],
   arguments_: [],
-  associatedArgument: {}
+  associatedArgument: {},
+  supportingPremises: []
 }

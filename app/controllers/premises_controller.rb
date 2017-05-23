@@ -29,7 +29,8 @@ class PremisesController < ApplicationController
         ActiveRecord::Base.transaction do
           @premise = Premise.new(premise_params)
           @premise.save!
-          @premise.source_ids=source_ids[:source_ids]
+          @premise.source_ids = source_ids[:source_ids]
+          @premise.supporting_premise_ids = supporting_premise_ids[:supporting_premise_ids]
           format.html {redirect_to @premise, notice: 'Premise was successfully created.'}
           format.json {render :show, status: :created, location: @premise}
         end
@@ -48,6 +49,7 @@ class PremisesController < ApplicationController
         ActiveRecord::Base.transaction do
           @premise.update(premise_params)
           @premise.source_ids=source_ids[:source_ids]
+          @premise.supporting_premise_ids = supporting_premise_ids[:supporting_premise_ids]
           format.html {redirect_to @premise, notice: 'Premise was successfully updated.'}
           format.json {render :show, status: :ok, location: @premise}
         end
@@ -81,6 +83,10 @@ class PremisesController < ApplicationController
 
   def source_ids
     params.permit(:source_ids => [])
+  end
+
+  def supporting_premise_ids
+    params.permit(:supporting_premise_ids => [])
   end
 
 end

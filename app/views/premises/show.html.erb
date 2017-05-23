@@ -7,6 +7,13 @@
   <h5><%= link_to "(#{@premise.argument.id}) #{@premise.argument.name}", argument_path(@premise.argument) %></h5>
 <% end %>
 
+<% if @premise.supporting_premises.any? %>
+  <h4>Supporting Premises</h4>
+  <% @premise.supporting_premises.each do |supporting_premise| %>
+    <h5><%= link_to "(#{supporting_premise.id}) #{supporting_premise.name}", source_path(supporting_premise) %></h5>
+  <% end %>
+<% end %>
+
 <% if @premise.sources.any? %>
   <h4>Sources</h4>
   <% @premise.sources.each do |source| %>
