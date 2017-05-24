@@ -2,5 +2,9 @@
   "application.js": "http://localhost:8080/packs/application.js",
   "application.js.map": "http://localhost:8080/packs/application.js.map",
   "server_rendering.js": "http://localhost:8080/packs/server_rendering.js",
-  "server_rendering.js.map": "http://localhost:8080/packs/server_rendering.js.map"
+  "server_rendering.js.map": "http://localhost:8080/packs/server_rendering.js.map",
+  "application.css": "http://localhost:8080/packs/application.css",
+  "application.css.map": "http://localhost:8080/packs/application.css.map",
+  "server_rendering.css": "http://localhost:8080/packs/server_rendering.css",
+  "server_rendering.css.map": "http://localhost:8080/packs/server_rendering.css.map"
 }

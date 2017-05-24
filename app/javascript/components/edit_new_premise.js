@@ -1,8 +1,7 @@
 import React, {Component} from 'react'
-import $ from 'jquery';
+import {ajax} from 'jquery';
 import Select from 'react-select';
 import PropTypes from 'prop-types';
-
 
 export default class EditNewPremise extends Component {
 
@@ -17,7 +16,7 @@ export default class EditNewPremise extends Component {
   onSubmitForm(event) {
     event.preventDefault()
     const {premise, associatedSources, associatedArgument, supportingPremises} = this.state
-    premise.argument_id = associatedArgument ? associatedArgument['id']: null
+    premise.argument_id = associatedArgument ? associatedArgument['id'] : null
     let data = {
       premise: premise,
       source_ids: associatedSources.map((source) => source.id),
@@ -34,7 +33,7 @@ export default class EditNewPremise extends Component {
       method = 'POST'
       url = '/premises'
     }
-    $.ajax({
+    ajax({
       url: url,
       method: method,
       contentType: "application/json; charset=utf-8",
@@ -73,7 +72,7 @@ export default class EditNewPremise extends Component {
           <div className="form-group">
             <label htmlFor="argument">Associated Argument</label>
             <Select
-              name="form-field-name"
+              name="argument"
               options={arguments_}
               onChange={(value) => this.setState({associatedArgument: value})}
               value={associatedArgument}
@@ -86,12 +85,11 @@ export default class EditNewPremise extends Component {
           <div className="form-group">
             <label htmlFor="supportingPremises">Supporting Premise(s)</label>
             <Select
-              name="form-field-name"
+              name="supportingPremises"
               options={premises}
               onChange={(value) => this.setState({supportingPremises: value})}
               multi={true}
               value={supportingPremises}
-              autosize={true}
               labelKey="name"
               valueKey="id"
               searchable={true}
@@ -100,7 +98,7 @@ export default class EditNewPremise extends Component {
           <div className="form-group">
             <label htmlFor="premiseSources">Associated Source(s)</label>
             <Select
-              name="form-field-name"
+              name="premiseSources"
               options={sources}
               onChange={(value) => this.setState({associatedSources: value})}
               multi={true}
