@@ -1,4 +1,5 @@
 {"scripts": {
+  "watch": "bin/webpack-dev-server",
   "webpack:deploy": "webpack --config=webpack/webpack.config.js -p",
   "heroku-postbuild": "npm run webpack:deploy"
 },
