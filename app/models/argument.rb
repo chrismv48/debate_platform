@@ -11,4 +11,11 @@
 class Argument < ApplicationRecord
   has_many :premises
 
+  def get_tree
+    tree = []
+    premises.map do |premise|
+      tree << premise.self_and_descendents
+    end
+    tree
+  end
 end

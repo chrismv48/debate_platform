@@ -2,12 +2,9 @@
 
 <h2><%= @argument.name %></h2>
 
-<% if @argument.premises.any? %>
-  <h4>Premises</h4>
-  <% @argument.premises.each do |premise| %>
-    <h5><%= link_to "(#{premise.id}) #{premise.name}", premise_path(premise) %></h5>
-  <% end %>
-<% end %>
+<%= react_component("argument_tree", {argument: @argument,
+                                      tree: @argument.get_tree,
+                                      authenticity_token: form_authenticity_token}) %>
 
 <%= link_to 'Edit', edit_argument_path(@argument) %> |
 <%= link_to 'Back', arguments_path %>

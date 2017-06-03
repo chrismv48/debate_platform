@@ -22,4 +22,16 @@ class Premise < ApplicationRecord
   has_many :supporting_connections, class_name: 'SupportingPremise', foreign_key: 'parent_premise_id', dependent: :delete_all
   has_many :supporting_premises, class_name: 'Premise', source: :premise, through: :supporting_connections
 
+  def descendents
+    descendents = []
+    supporting_connections.map do |parent_connection|
+      descendents << {premise: parent_connection.premise, connection: parent_connection}
+      parent_connection.premise.descendents
+    end
+    descendents
+  end
+
+  def self_and_descendents
+    descendents.unshift({premise: self, connection: nil})
+  end
 end
