@@ -21,63 +21,42 @@ export default class ArgumentTree extends Component {
     };
   }
 
-  componentDidMount() {
-    this.drawTree()
-  }
-
-  drawTree() {
-    var svg = d3.select("svg"),
-      width = +svg.attr("width"),
-      height = +svg.attr("height"),
-      g = svg.append("g").attr("transform", "translate(40,0)");
-
-    var tree = d3.tree()
-      .size([height, width - 160]);
-
-    var root = stratify()(testData)
-
-    var link = g.selectAll(".link")
-      .data(tree(root).links())
-      .enter().append("path")
-      .attr("class", "link")
-      .attr("d", d3.linkHorizontal()
-        .x(function (d) {
-          return d.y;
-        })
-        .y(function (d) {
-          return d.x;
-        }));
-
-    var node = g.selectAll(".node")
-      .data(root.descendants())
-      .enter().append("g")
-      .attr("class", function (d) {
-        return "node" + (d.children ? " node--internal" : " node--leaf");
-      })
-      .attr("transform", function (d) {
-        return "translate(" + d.y + "," + d.x + ")";
-      })
-
-    node.append("circle")
-      .attr("r", 2.5);
-
-    node.append("text")
-      .attr("dy", 3)
-      .attr("x", function (d) {
-        return d.children ? -8 : 8;
-      })
-      .style("text-anchor", function (d) {
-        return d.children ? "end" : "start";
-      })
-      .text(function (d) {
-        return d.id.substring(d.id.lastIndexOf(".") + 1);
-      });
-
-  }
-
   render() {
+    const root = stratify()(testData)
+    const treeLayout = d3.tree().size([860, 500]);
+    const tree = treeLayout(root)
+    const nodesList = tree.descendants().reverse();
+    const linksList = tree.links()//treeLayout.links(nodesList);
+    const lineLink = d3.linkVertical()
+      .x(function(d) { return d.x; })
+      .y(function(d) { return d.y; });
+
+    /* render the nodes */
+    const nodes = nodesList.map(node => {
+      return (
+        <g key={node.id} className="node"
+           transform={`translate(${node.x}, ${node.y})`}>
+          <circle r="10" fill="blue"/>
+          <text y="-19" dy=".35em" textAnchor="middle"
+                fillOpacity="0.5">{node.id}</text>
+        </g>
+      );
+    });
+
+    /* render the links */
+    const links = linksList.map(link => {
+      return (
+        <path key={`${link.source.id}-${link.target.id}`} className="link"
+              d={lineLink(link)}/>
+      );
+    });
     return (
-      <svg width="960" height="2000"></svg>
+      <svg width="960" height="600">
+        <g>
+          {links}
+          {nodes}
+        </g>
+      </svg>
     )
   }
 }
