@@ -4,11 +4,11 @@ import {stratify, tree} from 'd3-hierarchy'
 import * as d3 from "d3";
 
 let testData = [
-  {id: 1, parentId: null},
-  {id: 2, parentId: 1},
-  {id: 3, parentId: 1},
-  {id: 4, parentId: 2},
-  {id: 5, parentId: 2},
+  {id: 1, parentId: null, title: 'Marijuana should be legal'},
+  {id: 2, parentId: 1, title: 'MJ is good for you'},
+  {id: 3, parentId: 1, title: 'MJ is good for the economy'},
+  {id: 4, parentId: 2, title: "MJ doesn't cause cancer"},
+  {id: 5, parentId: 2, title: "MJ will raise tax revenue osijsdo over flow yeah owooo"}
 ]
 
 export default class ArgumentTree extends Component {
@@ -18,49 +18,57 @@ export default class ArgumentTree extends Component {
     this.state = {
       loading: false,
       argument: this.props.argument,
+      premiseHovered: null
     };
   }
 
+
   render() {
+    const nodeHeight = 50
+    const nodeWidth = 180
     const root = stratify()(testData)
     const treeLayout = d3.tree();
     treeLayout.size([950,450])
-    // treeLayout.nodeSize([400, 200])
     const tree = treeLayout(root)
     const nodesList = tree.descendants().reverse();
     console.log(nodesList)
-    let linksList = tree.links()//treeLayout.links(nodesList);
-    console.log(linksList)
-    const linksList2 = linksList.map(link => {
-      return {source: [link.source.x + 100, link.source.y + 100],
-      target: [link.target.x + 100, link.target.y]}
-    })
-    console.log(linksList2)
+    let linksList = tree.links()
     const lineLink = d3.linkVertical()
-      .x(function(d) { console.log(d); return d[0]; })
-      .y(function(d) { return d[1]; });
-      // .source((d) => )
+      .x(d => d[0])
+      .y(d => d[1]);
 
     /* render the nodes */
     const nodes = nodesList.map(node => {
       return (
         <g key={node.id} className="node"
-           transform={`translate(${node.x}, ${node.y})`}>
-          <rect width="200" height="100" strokeWidth="1" fillOpacity={0.1} fill="grey" stroke="black"/>
-          <text x="100" y="50" dy=".35em" textAnchor="middle"
-                fillOpacity="0.5">{node.id}</text>
+           transform={`translate(${node.x}, ${node.y})`}
+           fill={this.state.premiseHovered == node.id ? "yellow" : "grey"}
+           onMouseEnter={(event) => this.setState({premiseHovered: node.id})}
+           onMouseLeave={() => this.setState({premiseHovered: null})}
+        >
+          <rect id={node.id}
+                width={nodeWidth}
+                height={nodeHeight}
+                strokeWidth="1"
+                fillOpacity={0.1}
+                stroke="black"
+          />
+          <text x={nodeWidth / 2} y={nodeHeight / 2} textAnchor="middle" fill="black">{node.data.title}</text>
         </g>
       );
     });
 
     /* render the links */
-    const links = linksList2.map((link, i) => {
-      console.log(link)
+    const links = linksList.map((link, i) => {
+      const modifiedLinkCoordinates = {
+        source: [link.source.x + nodeWidth / 2, link.source.y + nodeHeight],
+        target: [link.target.x + nodeWidth / 2, link.target.y]
+      }
       return (
-        <path key={i} className="link"
-              d={lineLink(link)}/>
+        <path key={i} className="link" d={lineLink(modifiedLinkCoordinates)}/>
       );
     });
+
     return (
       <svg width="1000" height="1000">
         <g>
