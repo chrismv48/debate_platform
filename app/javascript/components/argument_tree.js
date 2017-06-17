@@ -23,35 +23,46 @@ export default class ArgumentTree extends Component {
 
   render() {
     const root = stratify()(testData)
-    const treeLayout = d3.tree().size([860, 500]);
+    const treeLayout = d3.tree();
+    treeLayout.size([950,450])
+    // treeLayout.nodeSize([400, 200])
     const tree = treeLayout(root)
     const nodesList = tree.descendants().reverse();
-    const linksList = tree.links()//treeLayout.links(nodesList);
+    console.log(nodesList)
+    let linksList = tree.links()//treeLayout.links(nodesList);
+    console.log(linksList)
+    const linksList2 = linksList.map(link => {
+      return {source: [link.source.x + 100, link.source.y + 100],
+      target: [link.target.x + 100, link.target.y]}
+    })
+    console.log(linksList2)
     const lineLink = d3.linkVertical()
-      .x(function(d) { return d.x; })
-      .y(function(d) { return d.y; });
+      .x(function(d) { console.log(d); return d[0]; })
+      .y(function(d) { return d[1]; });
+      // .source((d) => )
 
     /* render the nodes */
     const nodes = nodesList.map(node => {
       return (
         <g key={node.id} className="node"
            transform={`translate(${node.x}, ${node.y})`}>
-          <circle r="10" fill="blue"/>
-          <text y="-19" dy=".35em" textAnchor="middle"
+          <rect width="200" height="100" strokeWidth="1" fillOpacity={0.1} fill="grey" stroke="black"/>
+          <text x="100" y="50" dy=".35em" textAnchor="middle"
                 fillOpacity="0.5">{node.id}</text>
         </g>
       );
     });
 
     /* render the links */
-    const links = linksList.map(link => {
+    const links = linksList2.map((link, i) => {
+      console.log(link)
       return (
-        <path key={`${link.source.id}-${link.target.id}`} className="link"
+        <path key={i} className="link"
               d={lineLink(link)}/>
       );
     });
     return (
-      <svg width="960" height="600">
+      <svg width="1000" height="1000">
         <g>
           {links}
           {nodes}
