@@ -1,7 +1,9 @@
 import React, {Component} from 'react'
 import PropTypes from 'prop-types'
 
-import EditNewPremise from '../components/edit_new_premise'
+import './ArgumentTree.scss'
+
+import EditNewPremise from '../edit_new_premise'
 
 import {stratify, tree} from 'd3-hierarchy'
 import * as d3 from "d3";
@@ -89,20 +91,20 @@ export default class ArgumentTree extends Component {
       return (
         <foreignObject x={node.x} y={node.y} width={NODE_WIDTH} height={NODE_HEIGHT}>
           <div
+            className="node-container"
             style={{
-            width: NODE_WIDTH,
-            height: NODE_HEIGHT,
-            borderStyle: "solid",
+              width: NODE_WIDTH,
+              height: NODE_HEIGHT,
               display: this.getHiddenPremises().includes(premiseId) ? "none" : "inline-block"
-          }}
+            }}
             onClick={() => this.toggleSubTreeVisibility(premiseId)}
           >
             {premiseName}
-            <span onClick={(event) => this.handleModifyPremise(premiseId, event)}
-                  style={{cursor: "pointer"}}
-                  className="glyphicon glyphicon-plus"/>
-            <span style={{position: "static"}} className="glyphicon glyphicon-pencil"/>
-            <span style={{position: "static"}} className="glyphicon glyphicon-trash"/>
+            <span
+              onClick={(event) => this.handleModifyPremise(premiseId, event)}
+              className="glyphicon glyphicon-plus node-action"/>
+            <span className="glyphicon glyphicon-pencil node-action"/>
+            <span className="glyphicon glyphicon-trash node-action"/>
           </div>
         </foreignObject>
       )
@@ -156,7 +158,7 @@ export default class ArgumentTree extends Component {
   render() {
     const {showModal, selectedPremise} = this.state
     return (
-      <div>
+      <div className="ArgumentTree">
         <svg height={SVG_LAYOUT_HEIGHT} width={SVG_LAYOUT_WIDTH}>
           {this.generateTree()}
         </svg>

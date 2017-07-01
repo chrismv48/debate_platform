@@ -40,7 +40,7 @@ gem 'annotate'
 
 gem 'wdm', '>= 0.1.0' if Gem.win_platform?
 
-gem 'webpacker', github: 'rails/webpacker'
+gem 'webpacker', '~> 2.0'
 gem 'react-rails', github: 'reactjs/react-rails'
 
 group :development do
