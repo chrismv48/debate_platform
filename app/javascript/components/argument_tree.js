@@ -16,6 +16,11 @@ const SVG_LAYOUT_WIDTH = 900
 const SVG_LAYOUT_HEIGHT = 500
 const ROOT_NODE_MARGIN = 10
 
+const stopBubbling = (event) => {
+  event.stopPropagation()
+  event.cancelBubble = true;
+}
+
 export default class ArgumentTree extends Component {
 
   constructor(props) {
@@ -62,7 +67,8 @@ export default class ArgumentTree extends Component {
     }
   }
 
-  handleModifyPremise(premiseId) {
+  handleModifyPremise(premiseId, event) {
+    stopBubbling(event)
     this.setState({showModal: true})
     this.setState({selectedPremise: _.find(this.state.tree, (node) => node.premise.id === premiseId).premise})
   }
@@ -76,58 +82,27 @@ export default class ArgumentTree extends Component {
       (tree);
   }
 
-  generateTreeNodes(nodes) {
+  generateDivNodes(nodes) {
     return nodes.map(node => {
       const premiseId = node.data.premise.id
       const premiseName = node.data.premise.name
-      const {premiseHovered} = this.state
-      return (
-        <g key={premiseId} className="node"
-           transform={`translate(${node.x}, ${node.y})`}
-           fill={premiseHovered === premiseId ? "yellow" : "grey"}
-           onMouseEnter={(event) => this.setState({premiseHovered: premiseId})}
-           onMouseLeave={() => this.setState({premiseHovered: null})}
-           onClick={() => this.toggleSubTreeVisibility(premiseId)}
-           visibility={this.getHiddenPremises().includes(premiseId) ? "hidden" : "visible"}
-        >
-          <rect id={premiseId}
-                width={NODE_WIDTH}
-                height={NODE_HEIGHT}
-                strokeWidth="1"
-                fillOpacity={0.1}
-                stroke="black"
-          />
-          <text
-            x={NODE_WIDTH / 2}
-            y={NODE_HEIGHT / 2}
-            textAnchor="middle"
-            fill="black">{premiseName}
-          </text>
-          <foreignObject x={NODE_WIDTH - 50} y={NODE_HEIGHT - 20} width="45" height="20">
-            <span onClick={() => this.handleModifyPremise(premiseId)}
-                  style={{position: "static"}}
-                  className="glyphicon glyphicon-plus"/>
-            <span style={{position: "static"}} className="glyphicon glyphicon-pencil"/>
-            <span style={{position: "static"}} className="glyphicon glyphicon-trash"/>
-          </foreignObject>
-        </g>
-      );
-    });
-
-  }
-
-  generateDivNodes(nodes) {
-    return nodes.map(node => {
       return (
         <foreignObject x={node.x} y={node.y} width={NODE_WIDTH} height={NODE_HEIGHT}>
-          <div style={{
+          <div
+            style={{
             width: NODE_WIDTH,
             height: NODE_HEIGHT,
             borderStyle: "solid",
-            display: "inline-block"
+              display: this.getHiddenPremises().includes(premiseId) ? "none" : "inline-block"
           }}
+            onClick={() => this.toggleSubTreeVisibility(premiseId)}
           >
-            {node.data.premise.name}
+            {premiseName}
+            <span onClick={(event) => this.handleModifyPremise(premiseId, event)}
+                  style={{cursor: "pointer"}}
+                  className="glyphicon glyphicon-plus"/>
+            <span style={{position: "static"}} className="glyphicon glyphicon-pencil"/>
+            <span style={{position: "static"}} className="glyphicon glyphicon-trash"/>
           </div>
         </foreignObject>
       )
@@ -168,7 +143,7 @@ export default class ArgumentTree extends Component {
     const links = tree.links()
 
     const linkPaths = this.generateLinkPaths(links)
-    const displayNodes = this.generateTreeNodes(nodes)
+    const displayNodes = this.generateDivNodes(nodes)
 
     return (
       <g>
