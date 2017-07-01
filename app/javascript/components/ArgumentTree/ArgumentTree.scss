@@ -3,11 +3,35 @@
   .node-container {
     border-radius: 3px;
     border: 1px solid lightgray;
-    padding: 5px
+    padding: 5px;
+    position: relative;
+
+    &:hover {
+      background-color: lightyellow;
+    }
+
+  }
+
+  .node-header {
+    text-align: center;
   }
 
   .node-action {
     cursor: pointer;
     padding: 2px;
+    color: gray;
+
+    &:hover {
+      color: black;
   }
+  }
+
+  .node-actions-container {
+    float: right;
+    position: absolute;
+    padding: 3px;
+    bottom: 0;
+    right: 0;
+  }
+
 }

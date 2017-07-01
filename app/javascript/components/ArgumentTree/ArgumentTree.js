@@ -10,12 +10,12 @@ import * as d3 from "d3";
 import _ from 'underscore'
 import {Modal} from 'react-bootstrap'
 
-const NODE_HEIGHT = 50
-const NODE_WIDTH = 180
+const NODE_HEIGHT = 80
+const NODE_WIDTH = 220
 const TREE_LAYOUT_WIDTH = 850
 const TREE_LAYOUT_HEIGHT = 450
-const SVG_LAYOUT_WIDTH = 900
-const SVG_LAYOUT_HEIGHT = 500
+const SVG_LAYOUT_WIDTH = TREE_LAYOUT_WIDTH + NODE_WIDTH + 20
+const SVG_LAYOUT_HEIGHT = TREE_LAYOUT_HEIGHT + NODE_HEIGHT + 20
 const ROOT_NODE_MARGIN = 10
 
 const stopBubbling = (event) => {
@@ -30,7 +30,6 @@ export default class ArgumentTree extends Component {
     this.state = {
       loading: false,
       argument: this.props.argument,
-      premiseHovered: null,
       hiddenPremises: {},
       tree: this.props.tree[1],
       showModal: false,
@@ -99,12 +98,16 @@ export default class ArgumentTree extends Component {
             }}
             onClick={() => this.toggleSubTreeVisibility(premiseId)}
           >
-            {premiseName}
+            <h5 className="node-header">
+              {premiseName}
+            </h5>
+            <div className="node-actions-container">
             <span
               onClick={(event) => this.handleModifyPremise(premiseId, event)}
               className="glyphicon glyphicon-plus node-action"/>
-            <span className="glyphicon glyphicon-pencil node-action"/>
-            <span className="glyphicon glyphicon-trash node-action"/>
+              <span className="glyphicon glyphicon-pencil node-action"/>
+              <span className="glyphicon glyphicon-trash node-action"/>
+            </div>
           </div>
         </foreignObject>
       )
