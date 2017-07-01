@@ -3,6 +3,8 @@ import PropTypes from 'prop-types'
 import {stratify, tree} from 'd3-hierarchy'
 import * as d3 from "d3";
 import _ from 'underscore'
+import {Modal} from 'react-bootstrap'
+import EditNewPremise from '../components/edit_new_premise'
 
 
 export default class ArgumentTree extends Component {
@@ -14,7 +16,9 @@ export default class ArgumentTree extends Component {
       argument: this.props.argument,
       premiseHovered: null,
       hiddenPremises: {},
-      tree: this.props.tree[1]
+      tree: this.props.tree[1],
+      showModal: false,
+      selectedPremise: null
     }
   }
 
@@ -46,6 +50,11 @@ export default class ArgumentTree extends Component {
     }
   }
 
+  handleModifyPremise(premiseId) {
+    this.setState({showModal: true})
+    this.setState({selectedPremise: _.find(this.state.tree, (node) => node.premise.id === premiseId).premise})
+  }
+
   render() {
     const nodeHeight = 50
     const nodeWidth = 180
@@ -65,6 +74,24 @@ export default class ArgumentTree extends Component {
       .x(d => d[0])
       .y(d => d[1]);
 
+    const divNodes = nodesList.map(node => {
+      return (
+        <foreignObject x={node.x} y={node.y} width={nodeWidth} height={nodeHeight}>
+          <div style={{
+            // left: node.x,
+            // top: node.y,
+            // position: "relative",
+            width: nodeWidth,
+            height: nodeHeight,
+            borderStyle: "solid",
+            display: "inline-block"
+          }}
+          >
+            {node.data.premise.name}
+          </div>
+        </foreignObject>
+      )
+    })
     /* render the nodes */
     const nodes = nodesList.map(node => {
       return (
@@ -84,6 +111,13 @@ export default class ArgumentTree extends Component {
                 stroke="black"
           />
           <text x={nodeWidth / 2} y={nodeHeight / 2} textAnchor="middle" fill="black">{node.data.premise.name}</text>
+          <foreignObject x={nodeWidth - 50} y={nodeHeight - 20} width="45" height="20">
+            <span onClick={() => this.handleModifyPremise(node.data.premise.id)}
+                  style={{position: "static"}}
+                  className="glyphicon glyphicon-plus"/>
+            <span style={{position: "static"}} className="glyphicon glyphicon-pencil"></span>
+            <span style={{position: "static"}} className="glyphicon glyphicon-trash"></span>
+          </foreignObject>
         </g>
       );
     });
@@ -103,12 +137,20 @@ export default class ArgumentTree extends Component {
     });
 
     return (
-      <svg width="1000" height="1000">
-        <g>
+      <div>
+        <svg height="800" width="900">
           {links}
-          {nodes}
-        </g>
-      </svg>
+          {divNodes}
+        </svg>
+        <Modal show={this.state.showModal} onHide={() => this.setState({showModal: false})}>
+          <Modal.Header closeButton>
+            <Modal.Title>Heading</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <EditNewPremise premise={this.state.selectedPremise}/>
+          </Modal.Body>
+        </Modal>
+      </div>
     )
   }
 }
