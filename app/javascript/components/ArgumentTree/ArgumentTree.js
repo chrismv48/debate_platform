@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 
 import './ArgumentTree.scss'
 
-import EditNewPremise from '../edit_new_premise'
+import PremiseForm from '../PremiseForm/PremiseForm'
 
 import {stratify, tree} from 'd3-hierarchy'
 import * as d3 from "d3";
@@ -170,7 +170,7 @@ export default class ArgumentTree extends Component {
             <Modal.Title>Heading</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <EditNewPremise premise={selectedPremise}/>
+            <PremiseForm premise={selectedPremise}/>
           </Modal.Body>
         </Modal>
       </div>

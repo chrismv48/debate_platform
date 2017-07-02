@@ -3,7 +3,7 @@ import {ajax} from 'jquery';
 import Select from 'react-select';
 import PropTypes from 'prop-types';
 
-export default class EditNewPremise extends Component {
+export default class PremiseForm extends Component {
 
   constructor(props) {
     super(props);
@@ -11,6 +11,10 @@ export default class EditNewPremise extends Component {
       loading: false,
       ...this.props
     };
+  }
+
+  getSources() {
+
   }
 
   onSubmitForm(event) {
@@ -120,7 +124,7 @@ export default class EditNewPremise extends Component {
 }
 
 
-EditNewPremise.propTypes = {
+PremiseForm.propTypes = {
   // You can declare that a prop is a specific JS primitive. By default, these
   // are all optional.
   premise: PropTypes.object.isRequired,
@@ -131,7 +135,7 @@ EditNewPremise.propTypes = {
   supportingPremises: PropTypes.array
 }
 
-EditNewPremise.defaultProps = {
+PremiseForm.defaultProps = {
   sources: [],
   associatedSources: [],
   arguments_: [],

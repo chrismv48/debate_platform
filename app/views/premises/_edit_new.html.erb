@@ -1,8 +1,10 @@
-<%= react_component("edit_new_premise", {premise: @premise,
-                                         associatedSources: @premise.sources,
-                                         sources: Source.all,
-                                         associatedArgument: @premise.argument,
-                                         arguments_: Argument.all,
-                                         supportingPremises: @premise.supporting_premises,
-                                         premises: Premise.all,
-                                         authenticity_token: form_authenticity_token}) %>
+<%= javascript_pack_tag 'application' %>
+<%= react_component("PremiseForm/PremiseForm",
+                    {premise: @premise,
+                     associatedSources: @premise.sources,
+                     sources: Source.all,
+                     associatedArgument: @premise.argument,
+                     arguments_: Argument.all,
+                     supportingPremises: @premise.supporting_premises,
+                     premises: Premise.all,
+                     authenticity_token: form_authenticity_token}) %>
