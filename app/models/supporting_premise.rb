@@ -15,6 +15,6 @@
 #
 
 class SupportingPremise < ApplicationRecord
-  belongs_to :parent_premise, :class_name => 'Premise', foreign_key: 'parent_premise_id'
+  belongs_to :parent_premise, class_name: 'Premise', foreign_key: 'parent_premise_id'
   belongs_to :premise, foreign_key: 'premise_id'
 end

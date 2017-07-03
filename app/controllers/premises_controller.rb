@@ -50,8 +50,9 @@ class PremisesController < ApplicationController
           @premise.update(premise_params)
           @premise.source_ids=source_ids[:source_ids]
           @premise.supporting_premise_ids = supporting_premise_ids[:supporting_premise_ids]
+          @premise.parent_premise_ids = parent_premise_ids[:parent_premise_ids]
           format.html {redirect_to @premise, notice: 'Premise was successfully updated.'}
-          format.json { render json: @premise.argument.get_tree}
+          format.json { render json: Argument.find(argument_id[:argument_id]).get_tree}
         end
       rescue ActiveRecord::RecordInvalid
         format.html {render :edit}
@@ -87,6 +88,14 @@ class PremisesController < ApplicationController
 
   def supporting_premise_ids
     params.permit(:supporting_premise_ids => [])
+  end
+
+  def parent_premise_ids
+    params.permit(:parent_premise_ids => [])
+  end
+
+  def argument_id
+    params.permit(:argument_id)
   end
 
 end

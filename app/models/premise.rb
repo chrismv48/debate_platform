@@ -19,16 +19,16 @@ class Premise < ApplicationRecord
   has_many :premise_sources, dependent: :delete_all
   has_many :sources, through: :premise_sources
 
-  has_many :supporting_connections, class_name: 'SupportingPremise', foreign_key: 'parent_premise_id', dependent: :delete_all
-  has_many :supporting_premises, class_name: 'Premise', source: :premise, through: :supporting_connections
+  has_many :parent_premises, through: :parent_connections, source: :parent_premise
+  has_many :parent_connections, foreign_key: 'premise_id', class_name: 'SupportingPremise'
+
+  has_many :supporting_premises, through: :supporting_connections, source: :premise
+  has_many :supporting_connections, foreign_key: 'parent_premise_id', class_name: 'SupportingPremise'
 
   def descendents
-    descendents = []
-    supporting_connections.map do |parent_connection|
-      descendents << {premise: parent_connection.premise, connection: parent_connection}
-      parent_connection.premise.descendents
-    end
-    descendents
+    supporting_connections.map do |child|
+      [{premise: child.premise, connection: child}] + child.premise.descendents
+    end.flatten
   end
 
   def self_and_descendents

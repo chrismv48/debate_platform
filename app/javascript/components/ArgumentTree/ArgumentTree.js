@@ -32,15 +32,24 @@ export default class ArgumentTree extends Component {
       loading: false,
       argument: this.props.argument,
       hiddenPremises: {},
-      tree: this.props.tree[0],  //TODO: fix this shit
+      tree: this.props.tree[0],
       showModal: false,
       selectedPremise: null
     }
   }
 
   handleModalSubmit(newTree) {
-    console.log(newTree)
     this.setState({showModal: false, tree: newTree[0]})
+  }
+
+  getNodeParent(childNode) {
+    if (childNode.connection && childNode.connection.parent_premise_id) {
+      const parentPremiseId = childNode.connection.parent_premise_id
+      const parentNode = _.find(this.state.tree, (node) => node.premise.id === parentPremiseId)
+      console.log(parentPremiseId)
+      console.log(parentNode)
+      return parentNode.premise ? [parentNode.premise]: null
+    }
   }
 
   getSubTree(rootId, immediateChildrenOnly = false) {
@@ -50,7 +59,6 @@ export default class ArgumentTree extends Component {
     while (queue.length > 0) {
       let currentNode = queue.pop()
       let nodeChildren = tree.filter(node => (node.connection ? node.connection.parent_premise_id : null) === currentNode)
-      // let nodeChildrenIds = _.map(nodeChildren, node => node.premise.id)
       children = children.concat(nodeChildren)
       queue = queue.concat(nodeChildren)
 
@@ -82,7 +90,7 @@ export default class ArgumentTree extends Component {
   handleModifyPremise(premiseId, event) {
     stopBubbling(event)
     this.setState({showModal: true})
-    this.setState({selectedPremise: _.find(this.state.tree, (node) => node.premise.id === premiseId).premise})
+    this.setState({selectedPremise: _.find(this.state.tree, (node) => node.premise.id === premiseId)})
   }
 
   generateRoot() {
@@ -172,6 +180,7 @@ export default class ArgumentTree extends Component {
   render() {
     const {showModal, selectedPremise, argument} = this.state
     const {authenticity_token} = this.props
+    console.log(this.state.tree)
     return (
       <div className="ArgumentTree">
         <svg height={SVG_LAYOUT_HEIGHT} width={SVG_LAYOUT_WIDTH}>
@@ -180,15 +189,17 @@ export default class ArgumentTree extends Component {
         {selectedPremise &&
         <Modal show={showModal} onHide={() => this.setState({showModal: false})}>
           <Modal.Header closeButton>
-            <Modal.Title>Heading</Modal.Title>
+            <Modal.Title>Modify premise</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <PremiseForm
-              premise={selectedPremise}
-              associatedArgument={argument}
-              supportingPremises={_.pluck(this.getSubTree(selectedPremise.id, true), 'premise') || []}
+              premise={selectedPremise.premise}
+              associatedArgument={selectedPremise.premise.argument_id ? argument: null}
+              supportingPremises={_.pluck(this.getSubTree(selectedPremise.premise.id, true), 'premise') || []}
               authenticity_token={authenticity_token}
               handleModalSubmit={(newTree) => this.handleModalSubmit(newTree)}
+              parentPremises={this.getNodeParent(selectedPremise)}
+              argument_id={argument.id}
             />
           </Modal.Body>
         </Modal>

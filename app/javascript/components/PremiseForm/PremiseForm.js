@@ -51,18 +51,18 @@ export default class PremiseForm extends Component {
     })
   }
 
-
-
   onSubmitForm(event) {
     event.preventDefault()
-    const { handleModalSubmit } = this.props
-    const {premise, associatedSources, associatedArgument, supportingPremises} = this.state
+    const { handleModalSubmit, argument_id } = this.props
+    const {premise, associatedSources, associatedArgument, supportingPremises, parentPremises} = this.state
     premise.argument_id = associatedArgument ? associatedArgument['id'] : null
     let data = {
       premise: premise,
       source_ids: associatedSources.map((source) => source.id),
       supporting_premise_ids: supportingPremises.map((sp) => sp.id),
-      authenticity_token: this.props.authenticity_token
+      authenticity_token: this.props.authenticity_token,
+      parent_premise_ids: parentPremises.map(pp => pp.id),
+      argument_id: argument_id
     }
     let method = null
     let url = null
@@ -99,7 +99,7 @@ export default class PremiseForm extends Component {
   }
 
   render() {
-    const {premise, sources, associatedSources, arguments_, associatedArgument, premises, supportingPremises} = this.state
+    const {premise, sources, associatedSources, arguments_, associatedArgument, premises, supportingPremises, parentPremises} = this.state
     return (
       <div>
         <form>
@@ -121,6 +121,19 @@ export default class PremiseForm extends Component {
               onChange={(value) => this.setState({associatedArgument: value})}
               value={associatedArgument}
               autosize={true}
+              labelKey="name"
+              valueKey="id"
+              searchable={true}
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="parentPremises">Parent Premise(s)</label>
+            <Select
+              name="parentPremises"
+              options={premises}
+              onChange={(value) => this.setState({parentPremises: value})}
+              multi={true}
+              value={parentPremises}
               labelKey="name"
               valueKey="id"
               searchable={true}
@@ -170,6 +183,7 @@ PremiseForm.propTypes = {
   premise: PropTypes.object.isRequired,
   authenticity_token: PropTypes.string.isRequired,
   premises: PropTypes.object.array,
+  parentPremises: PropTypes.object.array,
   sources: PropTypes.array,
   associatedSources: PropTypes.array,
   arguments_: PropTypes.array,
@@ -179,5 +193,6 @@ PremiseForm.propTypes = {
 
 PremiseForm.defaultProps = {
   associatedSources: [],
-  supportingPremises: []
+  supportingPremises: [],
+  parentPremises: []
 }
