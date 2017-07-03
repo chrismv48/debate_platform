@@ -13,6 +13,7 @@ class Argument < ApplicationRecord
 
   def get_tree
     tree = []
+    puts premises
     premises.map do |premise|
       tree << premise.self_and_descendents
     end

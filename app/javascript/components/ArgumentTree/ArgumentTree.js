@@ -14,8 +14,9 @@ const NODE_HEIGHT = 80
 const NODE_WIDTH = 220
 const TREE_LAYOUT_WIDTH = 850
 const TREE_LAYOUT_HEIGHT = 450
-const SVG_LAYOUT_WIDTH = TREE_LAYOUT_WIDTH + NODE_WIDTH + 20
-const SVG_LAYOUT_HEIGHT = TREE_LAYOUT_HEIGHT + NODE_HEIGHT + 20
+const LEAF_NODE_MARGIN = 40
+const SVG_LAYOUT_WIDTH = TREE_LAYOUT_WIDTH + NODE_WIDTH + LEAF_NODE_MARGIN
+const SVG_LAYOUT_HEIGHT = TREE_LAYOUT_HEIGHT + NODE_HEIGHT + LEAF_NODE_MARGIN
 const ROOT_NODE_MARGIN = 10
 
 const stopBubbling = (event) => {
@@ -31,21 +32,31 @@ export default class ArgumentTree extends Component {
       loading: false,
       argument: this.props.argument,
       hiddenPremises: {},
-      tree: this.props.tree[1],
+      tree: this.props.tree[0],  //TODO: fix this shit
       showModal: false,
       selectedPremise: null
     }
   }
 
-  getSubTree(rootId) {
+  handleModalSubmit(newTree) {
+    console.log(newTree)
+    this.setState({showModal: false, tree: newTree[0]})
+  }
+
+  getSubTree(rootId, immediateChildrenOnly = false) {
     let children = []
     let queue = [rootId]
+    const {tree} = this.state
     while (queue.length > 0) {
       let currentNode = queue.pop()
-      let nodeChildren = this.state.tree.filter(node => (node.connection ? node.connection.parent_premise_id : null) === currentNode)
-      let nodeChildrenIds = _.map(nodeChildren, node => node.premise.id)
-      children = children.concat(nodeChildrenIds)
-      queue = queue.concat(nodeChildrenIds)
+      let nodeChildren = tree.filter(node => (node.connection ? node.connection.parent_premise_id : null) === currentNode)
+      // let nodeChildrenIds = _.map(nodeChildren, node => node.premise.id)
+      children = children.concat(nodeChildren)
+      queue = queue.concat(nodeChildren)
+
+      if (immediateChildrenOnly) {
+        break
+      }
     }
     return _.isEmpty(children) ? null : children
   }
@@ -55,11 +66,11 @@ export default class ArgumentTree extends Component {
 
     if (_.has(hiddenPremises, nodeId)) {
       const newHiddenPremises = _.omit(hiddenPremises, nodeId)
-      console.log(newHiddenPremises)
       this.setState({hiddenPremises: newHiddenPremises})
     }
     else {
-      const subTreeIds = this.getSubTree(nodeId)
+      const subTree = this.getSubTree(nodeId)
+      const subTreeIds = _.map(subTree, node => node.premise.id)
       if (subTreeIds) {
         let newHiddenPremises = {...hiddenPremises}
         newHiddenPremises[nodeId] = subTreeIds
@@ -159,20 +170,29 @@ export default class ArgumentTree extends Component {
   }
 
   render() {
-    const {showModal, selectedPremise} = this.state
+    const {showModal, selectedPremise, argument} = this.state
+    const {authenticity_token} = this.props
     return (
       <div className="ArgumentTree">
         <svg height={SVG_LAYOUT_HEIGHT} width={SVG_LAYOUT_WIDTH}>
           {this.generateTree()}
         </svg>
+        {selectedPremise &&
         <Modal show={showModal} onHide={() => this.setState({showModal: false})}>
           <Modal.Header closeButton>
             <Modal.Title>Heading</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <PremiseForm premise={selectedPremise}/>
+            <PremiseForm
+              premise={selectedPremise}
+              associatedArgument={argument}
+              supportingPremises={_.pluck(this.getSubTree(selectedPremise.id, true), 'premise') || []}
+              authenticity_token={authenticity_token}
+              handleModalSubmit={(newTree) => this.handleModalSubmit(newTree)}
+            />
           </Modal.Body>
         </Modal>
+        }
       </div>
     )
   }

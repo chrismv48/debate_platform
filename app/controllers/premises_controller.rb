@@ -51,7 +51,7 @@ class PremisesController < ApplicationController
           @premise.source_ids=source_ids[:source_ids]
           @premise.supporting_premise_ids = supporting_premise_ids[:supporting_premise_ids]
           format.html {redirect_to @premise, notice: 'Premise was successfully updated.'}
-          format.json {render :show, status: :ok, location: @premise}
+          format.json { render json: @premise.argument.get_tree}
         end
       rescue ActiveRecord::RecordInvalid
         format.html {render :edit}

@@ -2,8 +2,10 @@ import React, {Component} from 'react'
 import {ajax} from 'jquery';
 import Select from 'react-select';
 import PropTypes from 'prop-types';
+import _ from 'underscore'
 
 export default class PremiseForm extends Component {
+
 
   constructor(props) {
     super(props);
@@ -11,14 +13,49 @@ export default class PremiseForm extends Component {
       loading: false,
       ...this.props
     };
+
+    if (_.isEmpty(this.state.sources)) {
+      this.state.sources = this.getSources()
+    }
+
+    if (_.isEmpty(this.state.arguments_)) {
+      this.state.arguments_ = this.getArguments()
+    }
+
+    if (_.isEmpty(this.state.premises)) {
+      this.state.premises = this.getPremises()
+    }
   }
 
   getSources() {
-
+    ajax({
+      url: '/sources.json'
+    }).done(sources => {
+      this.setState({sources})
+    })
   }
+
+  getArguments() {
+    ajax({
+      url: '/arguments.json'
+    }).done(arguments_ => {
+      this.setState({arguments_})
+    })
+  }
+
+  getPremises() {
+    ajax({
+      url: '/premises.json'
+    }).done(premises => {
+      this.setState({premises})
+    })
+  }
+
+
 
   onSubmitForm(event) {
     event.preventDefault()
+    const { handleModalSubmit } = this.props
     const {premise, associatedSources, associatedArgument, supportingPremises} = this.state
     premise.argument_id = associatedArgument ? associatedArgument['id'] : null
     let data = {
@@ -29,7 +66,7 @@ export default class PremiseForm extends Component {
     }
     let method = null
     let url = null
-    if (window.location.pathname.search('edit') >= 0) {
+    if (premise.id) {
       method = 'PUT'
       url = `/premises/${premise.id}`
     }
@@ -37,19 +74,23 @@ export default class PremiseForm extends Component {
       method = 'POST'
       url = '/premises'
     }
+
     ajax({
       url: url,
       method: method,
-      contentType: "application/json; charset=utf-8",
+      contentType: "application/json",
+      dataType: handleModalSubmit ? "json": null,
       data: JSON.stringify(data),
       beforeSend: () => {
         this.setState({loading: true})
       }
-    }).done((data) => {
+    }).done(newTree => {
       this.setState({loading: false})
+      if (handleModalSubmit) {
+        handleModalSubmit(newTree)
+      }
     })
   }
-
 
   handleInputChange(event) {
     let premise = this.state.premise;
@@ -58,7 +99,6 @@ export default class PremiseForm extends Component {
   }
 
   render() {
-    console.log(this.state)
     const {premise, sources, associatedSources, arguments_, associatedArgument, premises, supportingPremises} = this.state
     return (
       <div>
@@ -128,6 +168,8 @@ PremiseForm.propTypes = {
   // You can declare that a prop is a specific JS primitive. By default, these
   // are all optional.
   premise: PropTypes.object.isRequired,
+  authenticity_token: PropTypes.string.isRequired,
+  premises: PropTypes.object.array,
   sources: PropTypes.array,
   associatedSources: PropTypes.array,
   arguments_: PropTypes.array,
@@ -136,9 +178,6 @@ PremiseForm.propTypes = {
 }
 
 PremiseForm.defaultProps = {
-  sources: [],
   associatedSources: [],
-  arguments_: [],
-  associatedArgument: {},
   supportingPremises: []
 }
