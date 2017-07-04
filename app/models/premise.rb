@@ -26,12 +26,37 @@ class Premise < ApplicationRecord
   has_many :supporting_connections, foreign_key: 'parent_premise_id', class_name: 'SupportingPremise'
 
   def descendents
-    supporting_connections.map do |child|
-      [{premise: child.premise, connection: child}] + child.premise.descendents
+    (supporting_connections + premise_sources).map do |child|
+      if child.model_name.human == 'Supporting premise'
+        node = [{
+                    composite_id: "premise#{child.premise.id}",
+                    composite_parent_id: "premise#{child.parent_premise_id}",
+                    type: 'premise',
+                    data: child.premise,
+                    connection: child
+                }]
+        node + child.premise.descendents
+      else
+        [{
+             composite_id: "source#{child.source.id}",
+             composite_parent_id: "premise#{child.premise.id}",
+             type: 'source',
+             data: child.source,
+             connection: child
+         }]
+      end
     end.flatten
   end
 
   def self_and_descendents
-    descendents.unshift({premise: self, connection: nil})
+    descendents.unshift({
+                            composite_id: "premise#{self.id}",
+                            composite_parent_id: nil,
+                            type: 'premise',
+                            data: self,
+                            connection: nil
+                        })
   end
+
 end
+

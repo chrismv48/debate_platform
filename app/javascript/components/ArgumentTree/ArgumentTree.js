@@ -16,8 +16,7 @@ const stopBubbling = (event) => {
   event.cancelBubble = true;
 }
 
-const getDepth = ({children}) => 1 +
-(children ? Math.max(...children.map(getDepth)) : 0)
+const getDepth = ({children}) => 1 + (children ? Math.max(...children.map(getDepth)) : 0)
 
 export default class ArgumentTree extends Component {
 
@@ -26,10 +25,10 @@ export default class ArgumentTree extends Component {
     this.state = {
       loading: false,
       argument: this.props.argument,
-      hiddenPremises: {},
+      hiddenNodes: {},
       tree: this.props.tree[0],
       showModal: false,
-      selectedPremise: null
+      selectedNode: null
     }
 
     this.node_height = 80
@@ -53,11 +52,7 @@ export default class ArgumentTree extends Component {
   }
 
   getNodeParent(childNode) {
-    if (childNode.connection && childNode.connection.parent_premise_id) {
-      const parentPremiseId = childNode.connection.parent_premise_id
-      const parentNode = _.find(this.state.tree, (node) => node.premise.id === parentPremiseId)
-      return parentNode.premise ? [parentNode.premise]: null
-    }
+    return _.filter(this.state.tree, node => node.composite_id === childNode.composite_parent_id)
   }
 
   fetchArgumentTree() {
@@ -72,11 +67,12 @@ export default class ArgumentTree extends Component {
 
   getSubTree(rootId, immediateChildrenOnly = false) {
     let children = []
-    let queue = [rootId]
     const {tree} = this.state
+    const rootNode = _.find(tree, node => node.composite_id === rootId)
+    let queue = [rootNode]
     while (queue.length > 0) {
       let currentNode = queue.pop()
-      let nodeChildren = tree.filter(node => (node.connection ? node.connection.parent_premise_id : null) === currentNode)
+      let nodeChildren = tree.filter(node => node.composite_parent_id === currentNode.composite_id)
       children = children.concat(nodeChildren)
       queue = queue.concat(nodeChildren)
 
@@ -88,86 +84,140 @@ export default class ArgumentTree extends Component {
   }
 
   toggleSubTreeVisibility(nodeId) {
-    const {hiddenPremises} = this.state
+    const {hiddenNodes} = this.state
 
-    if (_.has(hiddenPremises, nodeId)) {
-      const newHiddenPremises = _.omit(hiddenPremises, nodeId)
-      this.setState({hiddenPremises: newHiddenPremises})
+    if (_.has(hiddenNodes, nodeId)) {
+      const newHiddenNodes = _.omit(hiddenNodes, nodeId)
+      this.setState({hiddenNodes: newHiddenNodes})
     }
     else {
       const subTree = this.getSubTree(nodeId)
-      const subTreeIds = _.map(subTree, node => node.premise.id)
+      const subTreeIds = _.map(subTree, node => node.composite_id)
       if (subTreeIds) {
-        let newHiddenPremises = {...hiddenPremises}
-        newHiddenPremises[nodeId] = subTreeIds
-        this.setState({hiddenPremises: newHiddenPremises})
+        let newHiddenNodes = {...hiddenNodes}
+        newHiddenNodes[nodeId] = subTreeIds
+        this.setState({hiddenNodes: newHiddenNodes})
       }
     }
   }
 
-  handleShowModal(premiseId, event) {
+  handleShowModal(compositeId, event) {
     stopBubbling(event)
     this.setState({showModal: event.target.id})
-    this.setState({selectedPremise: _.find(this.state.tree, (node) => node.premise.id === premiseId)})
+    this.setState({selectedNode: _.find(this.state.tree, (node) => node.composite_id === compositeId)})
+
   }
 
   generateRoot() {
     let {tree} = this.state
-
     return d3.stratify()
-      .id((d) => d.premise.id)
-      .parentId(d => d.connection ? d.connection.parent_premise_id : null)
+      .id((d) => d.composite_id)
+      .parentId(d => d.composite_parent_id)
       (tree);
   }
 
   generateDivNodes(nodes) {
     return nodes.map(node => {
-      const premiseId = node.data.premise.id
-      const premiseName = node.data.premise.name
-      return (
-        <foreignObject
-          x={node.x}
-          y={node.y}
-          width={this.node_width}
-          height={this.node_height}
-          key={premiseId}
-        >
-          <div
-            className="node-container"
-            style={{
-              width: this.node_width,
-              height: this.node_height,
-              display: this.getHiddenPremises().includes(premiseId) ? "none" : "inline-block"
-            }}
-            onClick={() => this.toggleSubTreeVisibility(premiseId)}
-          >
-            <h5 className="node-header">
-              {premiseName}
-            </h5>
-            <div className="node-actions-container">
-              <span
-                id="create"
-                onClick={(event) => this.handleShowModal(premiseId, event)}
-                className="glyphicon glyphicon-plus node-action"
-              />
-              <span
-                id="modify"
-                onClick={(event) => this.handleShowModal(premiseId, event)}
-                className="glyphicon glyphicon-pencil node-action"
-              />
-              <span
-                id="destroy"
-                onClick={(event) => this.handleShowModal(premiseId, event)}
-                className="glyphicon glyphicon-trash node-action"/>
-            </div>
-          </div>
-        </foreignObject>
-      )
+      if (node.data.type === 'premise') {
+        return this.generatePremiseNode(node)
+      }
+      else {
+        return this.generateSourceNode(node)
+      }
     })
   }
 
-  getHiddenPremises() {
-    return _.flatten(_.values(this.state.hiddenPremises))
+  generateSourceNode(sourceNode) {
+    const compositeId = sourceNode.id
+    const sourceName = sourceNode.data.data.name
+    return (
+      <foreignObject
+        x={sourceNode.x}
+        y={sourceNode.y}
+        width={this.node_width}
+        height={this.node_height}
+        key={compositeId}
+      >
+        <div
+          className="node-container"
+          style={{
+            width: this.node_width,
+            height: this.node_height,
+            display: this.getHiddenNodes().includes(compositeId) ? "none" : "inline-block"
+          }}
+          onClick={() => this.toggleSubTreeVisibility(compositeId)}
+        >
+          <h5 className="node-header">
+            {sourceName}
+          </h5>
+          <div className="node-actions-container">
+              <span
+                id="create"
+                onClick={(event) => this.handleShowModal(compositeId, event)}
+                className="glyphicon glyphicon-plus node-action"
+              />
+            <span
+              id="modify"
+              onClick={(event) => this.handleShowModal(compositeId, event)}
+              className="glyphicon glyphicon-pencil node-action"
+            />
+            <span
+              id="destroy"
+              onClick={(event) => this.handleShowModal(compositeId, event)}
+              className="glyphicon glyphicon-trash node-action"/>
+          </div>
+        </div>
+      </foreignObject>
+    )
+  }
+
+  generatePremiseNode(premiseNode) {
+    const compositeId = premiseNode.id
+    const premiseName = premiseNode.data.data.name
+    return (
+      <foreignObject
+        x={premiseNode.x}
+        y={premiseNode.y}
+        width={this.node_width}
+        height={this.node_height}
+        key={compositeId}
+      >
+        <div
+          className="node-container"
+          style={{
+            width: this.node_width,
+            height: this.node_height,
+            display: this.getHiddenNodes().includes(compositeId) ? "none" : "inline-block"
+          }}
+          onClick={() => this.toggleSubTreeVisibility(compositeId)}
+        >
+          <h5 className="node-header">
+            {premiseName}
+          </h5>
+          <div className="node-actions-container">
+              <span
+                id="create"
+                onClick={(event) => this.handleShowModal(compositeId, event)}
+                className="glyphicon glyphicon-plus node-action"
+              />
+            <span
+              id="modify"
+              onClick={(event) => this.handleShowModal(compositeId, event)}
+              className="glyphicon glyphicon-pencil node-action"
+            />
+            <span
+              id="destroy"
+              onClick={(event) => this.handleShowModal(compositeId, event)}
+              className="glyphicon glyphicon-trash node-action"/>
+          </div>
+        </div>
+      </foreignObject>
+    )
+  }
+
+
+  getHiddenNodes() {
+    return _.flatten(_.values(this.state.hiddenNodes))
   }
 
   generateLinkPaths(links) {
@@ -183,7 +233,7 @@ export default class ArgumentTree extends Component {
       return (
         <path key={i}
               className="link" d={lineLink(modifiedLinkCoordinates)}
-              visibility={this.getHiddenPremises().includes(link.target.data.premise.id) ? "hidden" : "visible"}
+              visibility={this.getHiddenNodes().includes(link.target.data.composite_id) ? "hidden" : "visible"}
         />
       );
     });
@@ -234,7 +284,7 @@ export default class ArgumentTree extends Component {
   }
 
   render() {
-    const {showModal, selectedPremise, argument} = this.state
+    const {showModal, selectedNode, argument} = this.state
     const {authenticity_token} = this.props
     return (
       <div className="ArgumentTree">
@@ -247,13 +297,14 @@ export default class ArgumentTree extends Component {
           </Modal.Header>
           <Modal.Body>
             <PremiseForm
-              premise={selectedPremise.premise}
-              associatedArgument={selectedPremise.premise.argument_id ? argument: null}
-              supportingPremises={_.pluck(this.getSubTree(selectedPremise.premise.id, true), 'premise') || []}
-              authenticity_token={authenticity_token}
-              handleModalSubmit={(newTree) => this.handleModalSubmit(newTree)}
-              parentPremises={this.getNodeParent(selectedPremise)}
+              premise={selectedNode.data}
+              associatedArgument={selectedNode.data.argument_id ? argument: null}
+              supportingPremises={_.pluck(this.getSubTree(selectedNode.composite_id, true), 'data') || []}
+              parentPremises={_.pluck(this.getNodeParent(selectedNode), 'data')}
+              associatedSources={_.pluck(this.getSubTree(selectedNode.composite_id, true).filter(node => node.type === 'source'), 'data') || []}
               argument_id={argument.id}
+              handleModalSubmit={(newTree) => this.handleModalSubmit(newTree)}
+              authenticity_token={authenticity_token}
             />
           </Modal.Body>
         </Modal>
@@ -268,9 +319,9 @@ export default class ArgumentTree extends Component {
               premise={{id: null, name: null}}
               associatedArgument={null}
               supportingPremises={[]}
-              parentPremises={[selectedPremise.premise]}
-              handleModalSubmit={() => this.handleModalSubmit()}
+              parentPremises={[selectedNode.data]}
               argument_id={argument.id}
+              handleModalSubmit={() => this.handleModalSubmit()}
               authenticity_token={authenticity_token}
             />
           </Modal.Body>
@@ -287,7 +338,7 @@ export default class ArgumentTree extends Component {
           <Modal.Footer>
             <Button
               bsStyle="danger"
-              onClick={() => this.destroyPremise(selectedPremise.premise.id)}>
+              onClick={() => this.destroyPremise(selectedNode.composite_id)}>
               Confirm
             </Button>
           </Modal.Footer>
