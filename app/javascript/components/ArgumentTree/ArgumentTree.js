@@ -279,19 +279,24 @@ export default class ArgumentTree extends Component {
         {showModal === 'destroy' &&
         <Modal show={showModal === 'destroy'} onHide={() => this.setState({showModal: false})}>
           <Modal.Header closeButton>
-            <Modal.Title>Are you sure you want to delete this premise?</Modal.Title>
+            <Modal.Title>Confirm deletion</Modal.Title>
           </Modal.Header>
+          <Modal.Body>
+            Are you sure you want to delete this premise?
+          </Modal.Body>
           <Modal.Footer>
-            <Button onClick={() => this.destroyPremise(selectedPremise.premise.id)}>Confirm</Button>
+            <Button
+              bsStyle="danger"
+              onClick={() => this.destroyPremise(selectedPremise.premise.id)}>
+              Confirm
+            </Button>
           </Modal.Footer>
         </Modal>
         }
-
       </div>
     )
   }
 }
-
 
 ArgumentTree.propTypes = {
   argument: PropTypes.object.isRequired,
