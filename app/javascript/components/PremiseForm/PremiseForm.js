@@ -182,8 +182,8 @@ PremiseForm.propTypes = {
   // are all optional.
   premise: PropTypes.object.isRequired,
   authenticity_token: PropTypes.string.isRequired,
-  premises: PropTypes.object.array,
-  parentPremises: PropTypes.object.array,
+  premises: PropTypes.array,
+  parentPremises: PropTypes.array,
   sources: PropTypes.array,
   associatedSources: PropTypes.array,
   arguments_: PropTypes.array,

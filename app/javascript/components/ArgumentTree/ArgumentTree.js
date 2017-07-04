@@ -11,19 +11,13 @@ import _ from 'underscore'
 import {Modal, Button} from 'react-bootstrap'
 import {ajax} from 'jquery'
 
-const NODE_HEIGHT = 80
-const NODE_WIDTH = 220
-const TREE_LAYOUT_WIDTH = 850
-const TREE_LAYOUT_HEIGHT = 450
-const LEAF_NODE_MARGIN = 40
-const SVG_LAYOUT_WIDTH = TREE_LAYOUT_WIDTH + NODE_WIDTH + LEAF_NODE_MARGIN
-const SVG_LAYOUT_HEIGHT = TREE_LAYOUT_HEIGHT + NODE_HEIGHT + LEAF_NODE_MARGIN
-const ROOT_NODE_MARGIN = 10
-
 const stopBubbling = (event) => {
   event.stopPropagation()
   event.cancelBubble = true;
 }
+
+const getDepth = ({children}) => 1 +
+(children ? Math.max(...children.map(getDepth)) : 0)
 
 export default class ArgumentTree extends Component {
 
@@ -37,6 +31,21 @@ export default class ArgumentTree extends Component {
       showModal: false,
       selectedPremise: null
     }
+
+    this.node_height = 80
+    this.node_width = 220
+    this.tree_layout_width = 850
+    this.tree_layout_height = 450
+    this.leaf_node_margin = 40
+    this.svg_layout_width = this.tree_layout_width + this.node_width + this.leaf_node_margin
+    this.svg_layout_height = this.tree_layout_height + this.node_height + this.leaf_node_margin
+    this.root_node_margin = 10
+  }
+
+  calculateLayoutHeight(treeDepth) {
+    // TODO: This seems incorrect/stupid
+    this.tree_layout_height = (this.node_height + this.leaf_node_margin) * treeDepth
+    this.svg_layout_height = this.tree_layout_height + this.node_height + this.leaf_node_margin
   }
 
   handleModalSubmit() {
@@ -47,8 +56,6 @@ export default class ArgumentTree extends Component {
     if (childNode.connection && childNode.connection.parent_premise_id) {
       const parentPremiseId = childNode.connection.parent_premise_id
       const parentNode = _.find(this.state.tree, (node) => node.premise.id === parentPremiseId)
-      console.log(parentPremiseId)
-      console.log(parentNode)
       return parentNode.premise ? [parentNode.premise]: null
     }
   }
@@ -118,12 +125,18 @@ export default class ArgumentTree extends Component {
       const premiseId = node.data.premise.id
       const premiseName = node.data.premise.name
       return (
-        <foreignObject x={node.x} y={node.y} width={NODE_WIDTH} height={NODE_HEIGHT}>
+        <foreignObject
+          x={node.x}
+          y={node.y}
+          width={this.node_width}
+          height={this.node_height}
+          key={premiseId}
+        >
           <div
             className="node-container"
             style={{
-              width: NODE_WIDTH,
-              height: NODE_HEIGHT,
+              width: this.node_width,
+              height: this.node_height,
               display: this.getHiddenPremises().includes(premiseId) ? "none" : "inline-block"
             }}
             onClick={() => this.toggleSubTreeVisibility(premiseId)}
@@ -164,8 +177,8 @@ export default class ArgumentTree extends Component {
 
     return links.map((link, i) => {
       const modifiedLinkCoordinates = {
-        source: [link.source.x + NODE_WIDTH / 2, link.source.y + NODE_HEIGHT],
-        target: [link.target.x + NODE_WIDTH / 2, link.target.y]
+        source: [link.source.x + this.node_width / 2, link.source.y + this.node_height],
+        target: [link.target.x + this.node_width / 2, link.target.y]
       }
       return (
         <path key={i}
@@ -190,13 +203,23 @@ export default class ArgumentTree extends Component {
     )
   }
 
-  generateTree() {
+  generateTreeLayout() {
     const root = this.generateRoot()
+    const treeDepth = getDepth(root)
+    this.calculateLayoutHeight(treeDepth)
+    return (
+      <svg height={this.svg_layout_height} width={this.svg_layout_width}>
+        {this.generateTree(root)}
+      </svg>
+    )
+  }
+
+  generateTree(root) {
     let treeLayout = d3.tree();
-    treeLayout.size([TREE_LAYOUT_WIDTH, TREE_LAYOUT_HEIGHT])
+    treeLayout.size([this.tree_layout_width, this.tree_layout_height])
     const tree = treeLayout(root)
     let nodes = tree.descendants();
-    nodes[0].y += ROOT_NODE_MARGIN
+    nodes[0].y += this.root_node_margin
     const links = tree.links()
 
     const linkPaths = this.generateLinkPaths(links)
@@ -213,12 +236,9 @@ export default class ArgumentTree extends Component {
   render() {
     const {showModal, selectedPremise, argument} = this.state
     const {authenticity_token} = this.props
-    console.log(this.state.tree)
     return (
       <div className="ArgumentTree">
-        <svg height={SVG_LAYOUT_HEIGHT} width={SVG_LAYOUT_WIDTH}>
-          {this.generateTree()}
-        </svg>
+        {this.generateTreeLayout()}
 
         {showModal === 'modify' &&
         <Modal show={showModal === 'modify'} onHide={() => this.setState({showModal: false})}>
