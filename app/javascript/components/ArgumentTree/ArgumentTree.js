@@ -8,7 +8,8 @@ import PremiseForm from '../PremiseForm/PremiseForm'
 import {stratify, tree} from 'd3-hierarchy'
 import * as d3 from "d3";
 import _ from 'underscore'
-import {Modal} from 'react-bootstrap'
+import {Modal, Button} from 'react-bootstrap'
+import {ajax} from 'jquery'
 
 const NODE_HEIGHT = 80
 const NODE_WIDTH = 220
@@ -38,8 +39,8 @@ export default class ArgumentTree extends Component {
     }
   }
 
-  handleModalSubmit(newTree) {
-    this.setState({showModal: false, tree: newTree[0]})
+  handleModalSubmit() {
+    this.setState({showModal: false}, this.fetchArgumentTree())
   }
 
   getNodeParent(childNode) {
@@ -50,6 +51,16 @@ export default class ArgumentTree extends Component {
       console.log(parentNode)
       return parentNode.premise ? [parentNode.premise]: null
     }
+  }
+
+  fetchArgumentTree() {
+    ajax({
+      url: `/arguments/${this.props.argument.id}/argument_tree`
+    }).done(
+      argumentTree => {
+        this.setState({tree: argumentTree[0]})
+      }
+    )
   }
 
   getSubTree(rootId, immediateChildrenOnly = false) {
@@ -87,9 +98,9 @@ export default class ArgumentTree extends Component {
     }
   }
 
-  handleModifyPremise(premiseId, event) {
+  handleShowModal(premiseId, event) {
     stopBubbling(event)
-    this.setState({showModal: true})
+    this.setState({showModal: event.target.id})
     this.setState({selectedPremise: _.find(this.state.tree, (node) => node.premise.id === premiseId)})
   }
 
@@ -121,11 +132,20 @@ export default class ArgumentTree extends Component {
               {premiseName}
             </h5>
             <div className="node-actions-container">
-            <span
-              onClick={(event) => this.handleModifyPremise(premiseId, event)}
-              className="glyphicon glyphicon-plus node-action"/>
-              <span className="glyphicon glyphicon-pencil node-action"/>
-              <span className="glyphicon glyphicon-trash node-action"/>
+              <span
+                id="create"
+                onClick={(event) => this.handleShowModal(premiseId, event)}
+                className="glyphicon glyphicon-plus node-action"
+              />
+              <span
+                id="modify"
+                onClick={(event) => this.handleShowModal(premiseId, event)}
+                className="glyphicon glyphicon-pencil node-action"
+              />
+              <span
+                id="destroy"
+                onClick={(event) => this.handleShowModal(premiseId, event)}
+                className="glyphicon glyphicon-trash node-action"/>
             </div>
           </div>
         </foreignObject>
@@ -157,6 +177,19 @@ export default class ArgumentTree extends Component {
 
   }
 
+  destroyPremise(premiseId) {
+    ajax({
+      type: 'DELETE',
+      dataType: "json",
+      contentType: "application/json; charset=utf-8",
+      headers: { "Authorization": this.props.authenticity_token },
+      url: `/premises/${premiseId}`
+    }).done(_ => {
+        this.handleModalSubmit()
+      }
+    )
+  }
+
   generateTree() {
     const root = this.generateRoot()
     let treeLayout = d3.tree();
@@ -186,8 +219,9 @@ export default class ArgumentTree extends Component {
         <svg height={SVG_LAYOUT_HEIGHT} width={SVG_LAYOUT_WIDTH}>
           {this.generateTree()}
         </svg>
-        {selectedPremise &&
-        <Modal show={showModal} onHide={() => this.setState({showModal: false})}>
+
+        {showModal === 'modify' &&
+        <Modal show={showModal === 'modify'} onHide={() => this.setState({showModal: false})}>
           <Modal.Header closeButton>
             <Modal.Title>Modify premise</Modal.Title>
           </Modal.Header>
@@ -204,6 +238,35 @@ export default class ArgumentTree extends Component {
           </Modal.Body>
         </Modal>
         }
+        {showModal === 'create' &&
+        <Modal show={showModal === 'create'} onHide={() => this.setState({showModal: false})}>
+          <Modal.Header closeButton>
+            <Modal.Title>Add premise</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <PremiseForm
+              premise={{id: null, name: null}}
+              associatedArgument={null}
+              supportingPremises={[]}
+              parentPremises={[selectedPremise.premise]}
+              handleModalSubmit={() => this.handleModalSubmit()}
+              argument_id={argument.id}
+              authenticity_token={authenticity_token}
+            />
+          </Modal.Body>
+        </Modal>
+        }
+        {showModal === 'destroy' &&
+        <Modal show={showModal === 'destroy'} onHide={() => this.setState({showModal: false})}>
+          <Modal.Header closeButton>
+            <Modal.Title>Are you sure you want to delete this premise?</Modal.Title>
+          </Modal.Header>
+          <Modal.Footer>
+            <Button onClick={() => this.destroyPremise(selectedPremise.premise.id)}>Confirm</Button>
+          </Modal.Footer>
+        </Modal>
+        }
+
       </div>
     )
   }

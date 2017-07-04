@@ -31,8 +31,9 @@ class PremisesController < ApplicationController
           @premise.save!
           @premise.source_ids = source_ids[:source_ids]
           @premise.supporting_premise_ids = supporting_premise_ids[:supporting_premise_ids]
+          @premise.parent_premise_ids = parent_premise_ids[:parent_premise_ids]
           format.html {redirect_to @premise, notice: 'Premise was successfully created.'}
-          format.json {render :show, status: :created, location: @premise}
+          format.json { render json: @premise}
         end
       rescue ActiveRecord::RecordInvalid
         format.html {render :new}
@@ -52,7 +53,7 @@ class PremisesController < ApplicationController
           @premise.supporting_premise_ids = supporting_premise_ids[:supporting_premise_ids]
           @premise.parent_premise_ids = parent_premise_ids[:parent_premise_ids]
           format.html {redirect_to @premise, notice: 'Premise was successfully updated.'}
-          format.json { render json: Argument.find(argument_id[:argument_id]).get_tree}
+          format.json { render json: @premise}
         end
       rescue ActiveRecord::RecordInvalid
         format.html {render :edit}

@@ -1,5 +1,5 @@
 class ArgumentsController < ApplicationController
-  before_action :set_argument, only: [:show, :edit, :update, :destroy]
+  before_action :set_argument, only: [:show, :edit, :update, :destroy, :argument_tree]
 
   # GET /arguments
   # GET /arguments.json
@@ -69,6 +69,11 @@ class ArgumentsController < ApplicationController
       format.html {redirect_to arguments_url, notice: 'Argument was successfully destroyed.'}
       format.json {head :no_content}
     end
+  end
+
+  # GET /arguments/1/argument_tree
+  def argument_tree
+    render json: @argument.get_tree
   end
 
   private

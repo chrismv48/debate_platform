@@ -84,10 +84,10 @@ export default class PremiseForm extends Component {
       beforeSend: () => {
         this.setState({loading: true})
       }
-    }).done(newTree => {
+    }).done(_ => {
       this.setState({loading: false})
       if (handleModalSubmit) {
-        handleModalSubmit(newTree)
+        handleModalSubmit()
       }
     })
   }

@@ -3,7 +3,7 @@ Rails.application.routes.draw do
   resources :sources
   resources :premises
 
-  get '/premises/premise_form/:id', to: 'premises#premise_form', as: 'premise_form'
+  get '/arguments/:id/argument_tree', to: 'arguments#argument_tree', as: 'argument_tree'
 
   root 'arguments#index'
 
